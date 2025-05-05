@@ -245,14 +245,15 @@ export default function UserSettingsModal({
                     <FormLabel>Additional Information</FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder="Add any additional information about yourself that you'd like the AI to know"
+                        placeholder="Share more about yourself - hobbies, preferences, communication style, areas of expertise, or any context that would help the AI understand you better"
                         className="min-h-[100px]"
                         {...field}
                         value={field.value || ""}
                       />
                     </FormControl>
                     <FormDescription>
-                      This information will be included in your AI context
+                      This information helps personalize AI responses. Include your preferred communication style, 
+                      expertise areas, or any other context you'd like the AI to consider.
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -276,13 +277,13 @@ export default function UserSettingsModal({
                       const additionalInfo = form.getValues("additionalInfo");
                       
                       // Format profile information in a structured way
-                      let profileInfo = "";
-                      if (fullName) profileInfo += `name: ${fullName}\n`;
-                      if (location) profileInfo += `location: ${location}\n`;
-                      if (interests && interests.length > 0) profileInfo += `interests: ${interests.join(", ")}\n`;
-                      if (profession) profileInfo += `profession: ${profession}\n`;
-                      if (pets) profileInfo += `pets: ${pets}\n`;
-                      if (additionalInfo) profileInfo += `additional_info: ${additionalInfo}\n`;
+                      let profileInfo = "USER PROFILE:\n";
+                      if (fullName) profileInfo += `Name: ${fullName}\n`;
+                      if (location) profileInfo += `Location: ${location}\n`;
+                      if (interests && interests.length > 0) profileInfo += `Interests: ${interests.join(", ")}\n`;
+                      if (profession) profileInfo += `Profession: ${profession}\n`;
+                      if (pets) profileInfo += `Pets: ${pets}\n`;
+                      if (additionalInfo) profileInfo += `\nADDITIONAL CONTEXT:\n${additionalInfo}\n`;
                       
                       // Get existing context
                       const currentContext = form.getValues("systemContext") || "";
