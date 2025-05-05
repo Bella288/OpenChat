@@ -13,6 +13,7 @@ export const users = pgTable("users", {
   pets: text("pets"),
   additionalInfo: text("additional_info"),
   systemContext: text("system_context"),
+  profileImage: text("profile_image"),
 });
 
 export const insertUserSchema = createInsertSchema(users).pick({

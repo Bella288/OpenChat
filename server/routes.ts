@@ -589,6 +589,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Health check endpoint
+  // Profile image upload endpoint
+  app.post("/api/user/profile-image", async (req: Request, res: Response) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+
+    try {
+      const file = req.files?.image;
+      if (!file) {
+        return res.status(400).json({ message: "No image file provided" });
+      }
+
+      // Save file to Replit Object Storage and get URL
+      const fileName = `profile-${req.user.id}-${Date.now()}.${file.name.split('.').pop()}`;
+      const imageUrl = await storage.saveProfileImage(fileName, file);
+
+      // Update user profile with new image URL
+      const updatedUser = await storage.updateUserProfile(req.user.id, {
+        profileImage: imageUrl
+      });
+
+      res.json({ imageUrl });
+    } catch (error) {
+      console.error("Error uploading profile image:", error);
+      res.status(500).json({ message: "Failed to upload image" });
+    }
+  });
+
   app.get("/api/health", (_req: Request, res: Response) => {
     return res.json({ status: "ok" });
   });

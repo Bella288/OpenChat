@@ -157,6 +157,48 @@ export default function UserSettingsModal({
               
               <FormField
                 control={form.control}
+                name="profileImage"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Profile Picture</FormLabel>
+                    <FormControl>
+                      <div className="flex items-center gap-4">
+                        <img 
+                          src={field.value || (user?.profileImage || user?.replitProfileImage)} 
+                          alt="Profile" 
+                          className="h-16 w-16 rounded-full object-cover border"
+                        />
+                        <Input
+                          type="file"
+                          accept="image/*"
+                          onChange={async (e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              const formData = new FormData();
+                              formData.append('image', file);
+                              const res = await fetch('/api/user/profile-image', {
+                                method: 'POST',
+                                body: formData
+                              });
+                              if (res.ok) {
+                                const { imageUrl } = await res.json();
+                                field.onChange(imageUrl);
+                              }
+                            }
+                          }}
+                        />
+                      </div>
+                    </FormControl>
+                    <FormDescription>
+                      Upload a custom profile picture or use your Replit profile image
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
                 name="fullName"
                 render={({ field }) => (
                   <FormItem>
