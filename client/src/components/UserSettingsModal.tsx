@@ -39,7 +39,7 @@ const profileFormSchema = z.object({
   profession: z.string().optional(),
   pets: z.string().optional(),
   systemContext: z.string().optional(),
-  intent: z.string().optional(), //Add intent field to the form schema
+  additionalInfo: z.string().optional(),
 });
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
@@ -67,7 +67,7 @@ export default function UserSettingsModal({
       profession: "",
       pets: "",
       systemContext: "",
-      intent: "",
+      additionalInfo: "",
     },
   });
 
