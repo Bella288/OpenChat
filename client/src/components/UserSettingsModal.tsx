@@ -164,45 +164,66 @@ export default function UserSettingsModal({
                     <FormControl>
                       <div className="flex items-center gap-4">
                         <img 
-                          src={field.value || (user?.profileImage || user?.replitProfileImage)} 
+                          src={field.value || (user?.profileImage || user?.replitProfileImage) || 'https://github.com/shadcn.png'} 
                           alt="Profile" 
                           className="h-16 w-16 rounded-full object-cover border"
+                          onError={(e) => {
+                            e.currentTarget.src = 'https://github.com/shadcn.png';
+                          }}
                         />
-                        <Input
-                          type="file"
-                          accept="image/*"
-                          onChange={async (e) => {
-                            try {
-                              const file = e.target.files?.[0];
-                              if (file) {
+                        <div className="flex-1">
+                          <Input
+                            type="file"
+                            accept="image/jpeg,image/png,image/gif"
+                            onChange={async (e) => {
+                              try {
+                                const file = e.target.files?.[0];
+                                if (!file) return;
+
+                                // Validate file size
+                                if (file.size > 5 * 1024 * 1024) {
+                                  throw new Error('File size must be less than 5MB');
+                                }
+
                                 const formData = new FormData();
                                 formData.append('image', file);
+
                                 const res = await fetch('/api/user/profile-image', {
                                   method: 'POST',
                                   body: formData,
                                   credentials: 'include'
                                 });
+
                                 if (!res.ok) {
-                                  throw new Error('Failed to upload image');
+                                  const error = await res.json();
+                                  throw new Error(error.message || 'Failed to upload image');
                                 }
+
                                 const { imageUrl } = await res.json();
                                 field.onChange(imageUrl);
+                                
+                                toast({
+                                  title: "Success",
+                                  description: "Profile image updated successfully",
+                                });
+                              } catch (error: any) {
+                                console.error('Error uploading image:', error);
+                                toast({
+                                  title: "Upload failed",
+                                  description: error.message || "Failed to upload profile image",
+                                  variant: "destructive"
+                                });
+                                // Reset the input
+                                e.target.value = '';
                               }
-                            } catch (error) {
-                              console.error('Error uploading image:', error);
-                              toast({
-                                title: "Upload failed",
-                                description: "Failed to upload profile image",
-                                variant: "destructive"
-                              });
-                            }
-                          }}
-                        />
+                            }}
+                          />
+                          <FormDescription className="mt-1">
+                            Maximum file size: 5MB. Supported formats: JPEG, PNG, GIF
+                          </FormDescription>
+                        </div>
                       </div>
                     </FormControl>
-                    <FormDescription>
-                      Upload a custom profile picture or use your Replit profile image
-                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
