@@ -172,18 +172,29 @@ export default function UserSettingsModal({
                           type="file"
                           accept="image/*"
                           onChange={async (e) => {
-                            const file = e.target.files?.[0];
-                            if (file) {
-                              const formData = new FormData();
-                              formData.append('image', file);
-                              const res = await fetch('/api/user/profile-image', {
-                                method: 'POST',
-                                body: formData
-                              });
-                              if (res.ok) {
+                            try {
+                              const file = e.target.files?.[0];
+                              if (file) {
+                                const formData = new FormData();
+                                formData.append('image', file);
+                                const res = await fetch('/api/user/profile-image', {
+                                  method: 'POST',
+                                  body: formData,
+                                  credentials: 'include'
+                                });
+                                if (!res.ok) {
+                                  throw new Error('Failed to upload image');
+                                }
                                 const { imageUrl } = await res.json();
                                 field.onChange(imageUrl);
                               }
+                            } catch (error) {
+                              console.error('Error uploading image:', error);
+                              toast({
+                                title: "Upload failed",
+                                description: "Failed to upload profile image",
+                                variant: "destructive"
+                              });
                             }
                           }}
                         />

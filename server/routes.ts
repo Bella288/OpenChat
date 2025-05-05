@@ -596,17 +596,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
 
     try {
-      const file = req.files?.image;
-      if (!file) {
+      if (!req.files || !('image' in req.files)) {
         return res.status(400).json({ message: "No image file provided" });
       }
 
-      // Save file to Replit Object Storage and get URL
-      const fileName = `profile-${req.user.id}-${Date.now()}.${file.name.split('.').pop()}`;
-      const imageUrl = await storage.saveProfileImage(fileName, file);
+      const file = req.files.image;
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+      
+      if (!allowedTypes.includes(file.mimetype)) {
+        return res.status(400).json({ message: "Invalid file type. Only JPG, PNG and GIF allowed." });
+      }
 
-      // Update user profile with new image URL
-      const updatedUser = await storage.updateUserProfile(req.user.id, {
+      const maxSize = 5 * 1024 * 1024; // 5MB
+      if (file.size > maxSize) {
+        return res.status(400).json({ message: "File too large. Maximum size is 5MB." });
+      }
+
+      // Generate safe filename
+      const ext = file.name.split('.').pop()?.toLowerCase() || 'jpg';
+      const fileName = `profile-${req.user.id}-${Date.now()}.${ext}`;
+      
+      // Save file and get URL (implement this in storage.ts)
+      const imageUrl = await req.app.locals.storage.saveProfileImage(fileName, file);
+      
+      // Update user profile
+      await req.app.locals.storage.updateUserProfile(req.user.id, {
         profileImage: imageUrl
       });
 
